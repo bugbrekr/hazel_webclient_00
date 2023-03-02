@@ -1,0 +1,8 @@
+security_databases/
+commands_folder/**_db/
+# commands_folder/*_prv/
+__pycache__/
+.*
+commands.py
+local.key
+local.crt

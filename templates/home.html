@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Hazel</title>
+    <link rel="stylesheet" type="text/css" href="home.css">
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js" charset="utf-8"></script>
+    <script src="home.js" charset="utf-8"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+    <script rel="preconnect" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body>
+    <div class="terminal-window">
+      <div class="terminal-content">
+        <div id="terminal-textarea" class="terminal-textarea">
+            <input disabled id="terminal-prompt" type="text" value="" autocomplete=false style="width:0ch"><div id="terminal-cursor" class="terminal-cursor"></div>
+        </div>
+      </div>
+      <input type="text" name="" value="" id="hidden-text-input-prompt" style="opacity: 0; cursor: default;" autofocus autocapitalize="off" autocomplete=false>
+    </div>
+    <script type="text/javascript">
+    function start_cursor_blink_animation(){
+      $('#terminal-cursor').css("-webkit-animation", "1s steps(2, start) 1s infinite normal none running blink-animation")
+    }
+
+    String.prototype.removeCharAt = function (i) {
+      var tmp = this.split('');
+      tmp.splice(i - 1 , 1);
+      return tmp.join('');
+    }
+
+    password_mode = false
+    username = "anonymous"
+    var prompt_text = ""
+    var cursor_loc = 0
+    var on_command_function = null
+    terminalunit = new TerminalCommands()
+
+    function split_string(text){
+      var myRegexp = /[^\s"]+|"([^"]*)"/gi;
+      var out_array = [];
+
+      do {
+          //Each call to exec returns the next regex match as an array
+          var match = myRegexp.exec(text);
+          if (match != null)
+          {
+              //Index 1 in the array is the captured group if it exists
+              //Index 0 is the matched text, which we use if no captured group exists
+              out_array.push(match[1] ? match[1] : match[0]);
+          }
+      } while (match != null);
+      if (out_array.length == 0){
+        out_array = [""]
+      }
+      return out_array
+    }
+
+    function on_command(cmd, callback){
+      cmd = cmd.trim()
+      cmd_parsed = split_string(cmd)
+      exec = cmd_parsed[0]
+      args = cmd_parsed.slice(1)
+      terminalunit.run(exec, args, callback)
+    }
+
+    function get_input_text(pwd_mode=false){
+      password_mode = pwd_mode
+      input_promise = new Promise(function (callback){
+        on_command_function = callback
+      })
+      return input_promise
+    }
+
+    function on_hidden_input_prompt_change(e, keypress=null){
+      if (password_mode == true){
+        $("#terminal-prompt").attr("type", "password")
+        $("#hidden-text-input-prompt").attr("type", "password")
+      } else if (password_mode == false){
+        $("#terminal-prompt").attr("type", "text")
+        $("#hidden-text-input-prompt").attr("type", "text")
+      }
+      $('#terminal-cursor').css("-webkit-animation", "none")
+      if (keypress.key == "Enter"){
+        document.getElementById("terminal-textarea").querySelectorAll("p")[0]
+        prompt = document.getElementById("terminal-prompt")
+        if (password_mode == true){
+          $("<p>"+"•".repeat(e.value.length)+"</p><br>").insertBefore("#terminal-prompt")
+        } else if (password_mode == false){
+          $("<p>"+e.value+"</p><br>").insertBefore("#terminal-prompt")
+        }
+        e.value = ""
+        on_command_function(prompt_text)
+        password_mode = false
+      }
+      document.getElementById("hidden-text-input-prompt").scrollIntoView();
+
+      prompt_text = e.value
+      document.getElementById('terminal-prompt').value = prompt_text
+      document.getElementById('terminal-prompt').style.width = document.getElementById('terminal-prompt').value.length + "ch";
+      $("#terminal-cursor").css("left", e.selectionStart-prompt_text.length+"ch")
+      setInterval(start_cursor_blink_animation, 1)
+    }
+
+    $("#hidden-text-input-prompt").keydown(function(e) {
+      setTimeout(function(){on_hidden_input_prompt_change(document.getElementById("hidden-text-input-prompt"), e)}, 50)
+    });
+
+    $(document).click(function (){
+      document.getElementById("hidden-text-input-prompt").focus()
+    });
+
+    function terminal_main_prompt(){
+      $().insertBefore("#terminal-prompt")
+      terminalunit.print_html("<p style='color: gainsboro'>"+username+"</p><p style='color: sandybrown'>@</p><p style='color: lightslategray'>hazel</p><p style='color: goldenrod; margin: 0 0.1em 0em 0.1em;'>$</p>")
+      get_input_text().then(function (cmd){
+        on_command_promise = new Promise(function (callback){on_command(cmd, callback)})
+        on_command_promise.then(function (){
+          terminal_main_prompt()
+        })
+      })
+    }
+    terminal_main_prompt()
+    </script>
+  </body>
+</html>

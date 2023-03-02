@@ -1,0 +1,65 @@
+body {
+  background-color: #162525;
+}
+
+.terminal-window {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 95%;
+  height: 95%;
+  transform: translate(-50%, -50%);
+}
+
+.terminal-content {
+  margin: 1%;
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 1.25em;
+  margin-bottom: 1%;
+  margin-right: 0;
+  line-height: 1.25em;
+}
+
+.terminal-textarea {
+  margin: 0;
+  display: inline-block;
+}
+
+.terminal-content p {
+  color: white;
+  display: inline-block;
+  margin: 0;
+}
+
+.terminal-content input {
+  color: white;
+  display: inline-block;
+  margin: 0;
+  background-color: transparent;
+  decorations: none;
+  border: none;
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 1em;
+  padding: 0;
+  cursor: text;
+}
+
+.terminal-cursor {
+  display: inline-block;
+  position: relative;
+  height: 1em;
+  width: 0.1em;
+  background-color: white;
+  cursor: text;
+}
+
+.terminal-cursor {
+  -webkit-animation: blink-animation 1s steps(2, start) infinite;
+}
+
+@keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
