@@ -1,6 +1,6 @@
 security_databases/
 commands_folder/**_db/
-# commands_folder/*_prv/
+commands_folder/**_prv/
 __pycache__/
 .*
 commands.py
